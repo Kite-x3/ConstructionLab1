@@ -33,7 +33,9 @@ namespace BASA
                 adapter.Fill(ds);
                 dataGridView1.DataSource = ds.Tables[0];
             }
-
+            dataGridView1.Columns["ProgramID"].HeaderText = "ID Программы";
+            dataGridView1.Columns["Name"].HeaderText = "Название Программы";
+            dataGridView1.Columns["CostFormula"].HeaderText = "Формула расчёта";
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
@@ -79,19 +81,36 @@ namespace BASA
                 using (SqlConnection connection = new SqlConnection(connectionString))
                 {
                     connection.Open();
-                    string query = "SELECT ContractID, ClientID, InsuranceAgentID, Cost, StartDate, EndDate " +
-                                   "FROM Contract WHERE ProgramID = @ProgramID";
+                   
+                    string query = @"
+                SELECT 
+                    Contract.ContractID, 
+                    Client.FullName AS ClientName, 
+                    InsuranceAgent.FullName AS AgentName, 
+                    Contract.Cost, 
+                    Contract.StartDate, 
+                    Contract.EndDate 
+                FROM 
+                    Contract
+                INNER JOIN 
+                    Client ON Contract.ClientID = Client.ClientID
+                INNER JOIN 
+                    InsuranceAgent ON Contract.InsuranceAgentID = InsuranceAgent.InsuranceAgentID
+                WHERE 
+                    Contract.ProgramID = @ProgramID";
+
                     SqlCommand command = new SqlCommand(query, connection);
                     command.Parameters.AddWithValue("@ProgramID", selectedProgramID);
                     SqlDataReader reader = command.ExecuteReader();
 
+                    
                     dataGridView3.Columns.Clear();
                     dataGridView3.Rows.Clear();
 
                     
                     dataGridView3.Columns.Add("ContractID", "ID договора");
-                    dataGridView3.Columns.Add("ClientID", "ID клиента");
-                    dataGridView3.Columns.Add("InsuranceAgentID", "ID агента");
+                    dataGridView3.Columns.Add("ClientName", "Имя клиента");
+                    dataGridView3.Columns.Add("AgentName", "Имя агента");
                     dataGridView3.Columns.Add("Cost", "Стоимость контракта");
                     dataGridView3.Columns.Add("StartDate", "Дата начала");
                     dataGridView3.Columns.Add("EndDate", "Дата окончания");
@@ -101,8 +120,8 @@ namespace BASA
                     {
                         dataGridView3.Rows.Add(
                             reader["ContractID"],
-                            reader["ClientID"],
-                            reader["InsuranceAgentID"],
+                            reader["ClientName"],
+                            reader["AgentName"],
                             reader["Cost"],
                             reader["StartDate"],
                             reader["EndDate"]
@@ -111,6 +130,7 @@ namespace BASA
                 }
             }
         }
+
 
         private void button4_Click(object sender, EventArgs e)
         {
@@ -253,6 +273,11 @@ namespace BASA
 
                 dataGridView5.ReadOnly = false;
                 dataGridView5.Columns["CaseID"].ReadOnly = true;
+                dataGridView5.Columns["ContractID"].HeaderText = "ID договора";
+                dataGridView5.Columns["PayoutAmount"].HeaderText = "Размер выплаты";
+                dataGridView5.Columns["Date"].HeaderText = "Дата";
+                dataGridView5.Columns["PayoutCount"].HeaderText = "Количество выплат";
+                dataGridView5.Columns["CaseTypeID"].HeaderText = "ID  случая";
             }
         }
 
